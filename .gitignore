@@ -1,0 +1,26 @@
+# 1. 빌드 결과물 제외 (가장 중요)
+build/
+bin/
+out/
+*.exe
+*.dll
+*.lib
+*.pdb
+*.ilk
+*.obj
+
+# 2. VS Code 및 컴파일러 설정 파일 제외
+.vscode/
+.vs/
+*.user
+
+# 3. vcpkg 라이브러리 폴더 제외 (용량 큼)
+vcpkg_installed/
+vcpkg/
+
+# 4. OS 관련 잡동사니
+.DS_Store
+Thumbs.db
+
+# 5. [중요] assets 폴더는 올려야 함 (이미지, 소리)
+!assets/

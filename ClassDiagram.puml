@@ -1,0 +1,204 @@
+@startuml ClassDiagram.puml
+skinparam shadowing false
+skinparam dpi 180
+skinparam classAttributeIconSize 0
+left to right direction
+
+' ===== 외부 라이브러리 =====
+class "b2World" <<external>>
+class "b2Body" <<external>>
+class "b2Contact" <<external>>
+class "sf::RenderWindow" <<external>>
+class "sf::Texture" <<external>>
+class "sf::Text" <<external>>
+class "sf::Font" <<external>>
+class "sf::CircleShape" <<external>>
+class "sf::RectangleShape" <<external>>
+class "sf::Music" <<external>>
+class "sf::SoundBuffer" <<external>>
+class "sf::Sound" <<external>>
+
+' ===== Config / Enum =====
+class Config {
+  {static} +PPM : float
+  {static} +WINDOW_WIDTH : int
+  {static} +WINDOW_HEIGHT : int
+  {static} +GRAVITY : float
+}
+
+enum PuangTier {
+  Puang00
+  Puang01
+  Puang02
+  Puang03
+  Puang04
+  Puang05
+  Puang06
+  Puang07
+  Puang08
+  Puang09
+  Puang10
+}
+
+enum Scene {
+  Menu
+  Playing
+  Gallery
+}
+
+enum GameState {
+  Ready
+  Playing
+  GameOver
+}
+
+' ===== PhysicsWorld =====
+class PhysicsWorld {
+  - world : b2World*
+  - velocityIterations : int
+  - positionIterations : int
+  + PhysicsWorld()
+  + ~PhysicsWorld()
+  + update(dt : float) : void
+  + getWorld() : b2World*
+}
+
+PhysicsWorld --> "b2World"
+
+' ===== Playfield =====
+class Playfield {
+  - walls[3] : sf::RectangleShape
+  - limitLine : sf::RectangleShape
+  + Playfield(world : b2World*)
+  + render(window : sf::RenderWindow&) : void
+  + getLimitLineY() : float
+  - createWall(world : b2World*, x : float, y : float, w : float, h : float) : void
+}
+
+Playfield --> "b2World"
+Playfield --> "sf::RectangleShape"
+Playfield --> "sf::RenderWindow"
+
+' ===== Puang =====
+class Puang {
+  - body : b2Body*
+  - shape : sf::CircleShape
+  - tier : PuangTier
+  + isDead : bool
+  + Puang(world : b2World*, tier : PuangTier, x : float, y : float, texture : sf::Texture&)
+  + ~Puang()
+  + update() : void
+  + render(window : sf::RenderWindow&) : void
+  + getTier() : PuangTier
+  + getBody() : b2Body*
+  + getRadius() : float
+  {static} + radiusFor(t : PuangTier) : float
+}
+
+Puang --> PuangTier
+Puang --> "b2World"
+Puang --> "b2Body"
+Puang --> "sf::CircleShape"
+Puang --> "sf::Texture"
+Puang --> "sf::RenderWindow"
+
+' ===== PuangContactListener =====
+class PuangContactListener {
+  + mergeQueue : std::vector<std::pair<Puang*, Puang*>>
+  + BeginContact(contact : b2Contact*) : void
+}
+
+PuangContactListener --> Puang
+PuangContactListener --> "b2Contact"
+
+' ===== PuangManager =====
+class PuangManager {
+  - world : b2World*
+  - puangs : std::vector<Puang*>
+  - contactListener : PuangContactListener
+  - score : int
+  - textures : std::map<PuangTier, sf::Texture>
+  + PuangManager(world : b2World*)
+  + ~PuangManager()
+  + update() : void
+  + render(window : sf::RenderWindow&) : void
+  + spawnPuang(tier : PuangTier, x : float, y : float) : Puang*
+  + getScore() : int
+  + getTexture(tier : PuangTier) : sf::Texture&
+  + processMerges() : void
+}
+
+PuangManager "1" *-- "*" Puang
+PuangManager *-- PuangContactListener
+PuangManager --> PuangTier
+PuangManager --> "b2World"
+PuangManager --> "sf::Texture"
+PuangManager --> "sf::RenderWindow"
+
+' ===== UIManager =====
+class UIManager {
+  - font : sf::Font
+  - scoreText : sf::Text
+  - hasFont : bool
+  + UIManager()
+  + updateScore(score : int) : void
+  + render(window : sf::RenderWindow&) : void
+}
+
+UIManager --> "sf::Font"
+UIManager --> "sf::Text"
+UIManager --> "sf::RenderWindow"
+
+' ===== Game =====
+class Game {
+  - window : sf::RenderWindow
+  - physicsWorld : PhysicsWorld*
+  - playfield : Playfield*
+  - puangManager : PuangManager*
+  - uiManager : UIManager*
+  - guideLine : sf::RectangleShape
+  - uiBackground : sf::RectangleShape
+  - currentTier : PuangTier
+  - nextTier : PuangTier
+  - currentScene : Scene
+  - state : GameState
+  - font : sf::Font
+  - titleText : sf::Text*
+  - startButton : sf::RectangleShape
+  - startText : sf::Text*
+  - galleryButton : sf::RectangleShape
+  - galleryText : sf::Text*
+  - backButton : sf::RectangleShape
+  - backText : sf::Text*
+  - bgm : sf::Music*
+  - dropBuffer : sf::SoundBuffer
+  - dropSound : sf::Sound*
+  + Game()
+  + ~Game()
+  + run() : void
+  - processEvents() : void
+  - update() : void
+  - render() : void
+  - generateNext() : void
+  - updateNextPreview() : void
+  - updateCurrentPreview() : void
+  - getClampedMouseX() : float
+}
+
+Game "1" o-- "1" PhysicsWorld
+Game "1" o-- "1" Playfield
+Game "1" o-- "1" PuangManager
+Game "1" o-- "1" UIManager
+
+Game --> PuangTier
+Game --> Scene
+Game --> GameState
+Game --> "sf::RenderWindow"
+Game --> "sf::Music"
+Game --> "sf::Sound"
+Game --> "sf::SoundBuffer"
+Game --> "sf::Font"
+Game --> "sf::Text"
+Game --> "sf::RectangleShape"
+
+@enduml

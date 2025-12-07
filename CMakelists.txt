@@ -1,0 +1,28 @@
+cmake_minimum_required(VERSION 3.10)
+project(PuangProject)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+find_package(SFML CONFIG REQUIRED COMPONENTS Graphics Window System Audio)
+find_package(box2d CONFIG REQUIRED)
+
+set(SOURCES 
+    main.cpp
+    Game.cpp
+    PhysicsWorld.cpp
+    Playfield.cpp
+    Puang.cpp
+    PuangManager.cpp
+    UIManager.cpp
+)
+
+add_executable(PuangProject ${SOURCES})
+
+target_link_libraries(PuangProject PRIVATE 
+    SFML::Graphics 
+    SFML::Window 
+    SFML::System 
+    SFML::Audio 
+    box2d::box2d
+)
