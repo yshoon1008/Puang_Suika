@@ -18,9 +18,10 @@ out/
 vcpkg_installed/
 vcpkg/
 
-# 4. OS 관련 잡동사니
+# 4. 잡동사니
 .DS_Store
 Thumbs.db
+.puml
 
 # 5. [중요] assets 폴더는 올려야 함 (이미지, 소리)
 !assets/
